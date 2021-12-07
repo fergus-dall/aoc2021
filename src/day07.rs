@@ -26,10 +26,45 @@ fn main() {
     println!("{}", second_part(&str));
 }
 
+fn parse(s: &str) -> Vec<usize> {
+    let mut result = Vec::new();
+    for n in s.split(',') {
+        let n = n.trim().parse().expect("Couldn't parse value");
+
+        while result.len() <= n {
+            result.push(0);
+        }
+
+        result[n] += 1;
+    }
+
+    result
+}
+
+fn find_best<T: Fn(usize) -> usize>(v: &Vec<usize>, f: T) -> usize {
+    let mut best_cost = usize::MAX;
+    for guess in 0..v.len() {
+        let cost = v.iter().enumerate()
+            .map(|(i,x)| {
+                let dist = (guess as isize - i as isize).abs() as usize;
+                f(dist) * x
+            })
+            .fold(0, |x,y| x+y);
+
+        if cost < best_cost {
+            best_cost = cost;
+        }
+    }
+
+    best_cost
+}
+
 fn first_part(s: &str) -> usize {
-    0
+    let v = parse(s);
+    find_best(&v, |dist| dist)
 }
 
 fn second_part(s: &str) -> usize {
-    0
+    let v = parse(s);
+    find_best(&v, |dist| dist*(dist+1)/2)
 }
